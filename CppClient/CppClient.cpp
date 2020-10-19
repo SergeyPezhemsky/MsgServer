@@ -3,12 +3,15 @@
 
 #include "pch.h"
 #include "framework.h"
+#include <mutex>
 #include "CppClient.h"
 #include "../MsgServer/Msg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+std::mutex MLock;
 
 void ProcessMessages()
 {
@@ -19,7 +22,9 @@ void ProcessMessages()
         {
         case M_DATA:
         {
+            MLock.lock();
             cout << m.m_Data << endl;
+            MLock.unlock();
             break;
         }
         default:
@@ -46,18 +51,22 @@ void Client()
         cin >> n;
         switch (n) {
         case 1: {
+            MLock.lock();
             cout << "Enter Id\n";
             int id;
             cin >> id;
             cout << "Enter text\n";
             string s;
             cin >> s;
+            MLock.unlock();
             Message::Send(id, M_DATA, s);
             break;
         }
         case 2: {
+            MLock.lock();
             string s;
             cin >> s;
+            MLock.unlock();
             Message::Send(M_ALL, M_DATA, s);
             break;
         }

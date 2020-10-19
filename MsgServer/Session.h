@@ -12,6 +12,7 @@ struct Session
 	Session(int ID, string Name)
 		:m_ID(ID), m_Name(Name)
 	{
+		time = std::chrono::system_clock::now();
 	}
 
 	void Add(Message& m)

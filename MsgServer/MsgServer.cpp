@@ -13,16 +13,17 @@
 
 int gMaxID = M_USER;
 map<int, shared_ptr<Session>> gSessions;
-//std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
 
 
 void timer()
 {
     while (true)
     {
+        auto time = std::chrono::system_clock::now();
         for (map<int, shared_ptr<Session>>::iterator it = gSessions.begin(); it != gSessions.end();) {
-            if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - it->second->time).count() > 1000000) {
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(time - it->second->time).count() > 10000) {
                 it = gSessions.erase(it);
+               
             }
             else {
                 it++;
@@ -46,7 +47,6 @@ void ProcessClient(SOCKET hSock)
         case M_INIT:
         {
             auto pSession = make_shared<Session>(++gMaxID, m.m_Data);
-            pSession->time = std::chrono::system_clock::now();
             gSessions[pSession->m_ID] = pSession;
             Message::Send(s, pSession->m_ID, M_BROKER, M_INIT);
             break;
@@ -57,20 +57,21 @@ void ProcessClient(SOCKET hSock)
             Message::Send(s, m.m_Header.m_From, M_BROKER, M_CONFIRM);
             return;
         }
-        gSessions.find(m.m_Header.m_From)->second->time = std::chrono::system_clock::now();
         case M_GETDATA:
         {
             if (gSessions.find(m.m_Header.m_From) != gSessions.end())
             {
+                gSessions[m.m_Header.m_From]->time = std::chrono::system_clock::now();
                 gSessions[m.m_Header.m_From]->Send(s);
             }
             break;
         }
         default:
-        {
-           
+        {  
             if (gSessions.find(m.m_Header.m_From) != gSessions.end())
             {
+                gSessions[m.m_Header.m_From]->time = std::chrono::system_clock::now();
+
                 if (gSessions.find(m.m_Header.m_To) != gSessions.end())
                 {
                     gSessions[m.m_Header.m_To]->Add(m);
