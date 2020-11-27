@@ -21,7 +21,7 @@ void timer()
     {
         auto time = std::chrono::system_clock::now();
         for (map<int, shared_ptr<Session>>::iterator it = gSessions.begin(); it != gSessions.end();) {
-            if (std::chrono::duration_cast<std::chrono::milliseconds>(time - it->second->time).count() > 10000) {
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(time - it->second->time).count() > 1000000) {
                 it = gSessions.erase(it);
                
             }
@@ -65,6 +65,14 @@ void ProcessClient(SOCKET hSock)
                 gSessions[m.m_Header.m_From]->Send(s);
             }
             break;
+        }
+        case M_ALLDATA:
+        {
+            if (gSessions.find(m.m_Header.m_From) != gSessions.end())
+            {
+                gSessions[m.m_Header.m_From]->time = std::chrono::system_clock::now();
+                gSessions[m.m_Header.m_From]->SendAll(s);
+            }
         }
         default:
         {  

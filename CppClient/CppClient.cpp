@@ -74,6 +74,10 @@ void Client()
             Message::Send(M_BROKER, M_EXIT);
             exit(0);
         }
+        case 4: {
+            Message m = Message::Send(M_BROKER, M_ALLDATA);
+            cout << m.m_Data << endl;
+        }
         default: {
             cout << "NT TM\n";
         }

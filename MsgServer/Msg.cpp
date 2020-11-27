@@ -19,10 +19,16 @@ Message Message::Send(unsigned int To, unsigned int Type, const string& Data)
 		throw runtime_error("Connection error");
 	}
 	Message m(To, m_ClientID, Type, Data);
+	if (Data != "")
+	{
+		cout << "To - " << To << ":::" << "M_Id - "  << m_ClientID << ":::" << "Type - " << Type << ":::" << "Data - " << Data << endl;
+		// cout << To << endl;
+	}
 	m.Send(s);
 	m.Receive(s);
 	if (m.m_Header.m_Type == M_INIT)
 	{
+		cout << m.m_Header.m_To;
 		m_ClientID = m.m_Header.m_To;
 	}
 	return m;
